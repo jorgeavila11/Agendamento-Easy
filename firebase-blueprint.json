@@ -1,0 +1,125 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Professional user profile settings for white-labeled page custom URL config.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "description": { "type": "string" },
+        "photoUrl": { "type": "string", "format": "uri" },
+        "address": { "type": "string" },
+        "publicSlug": { "type": "string" }
+      },
+      "required": ["uid", "name", "email", "phone", "publicSlug"]
+    },
+    "Service": {
+      "title": "Service Offered",
+      "description": "Service catalogs customized and published by the professional.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "duration": { "type": "integer" },
+        "price": { "type": "number" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "name", "duration", "price", "active"]
+    },
+    "Schedule": {
+      "title": "Working Hours and Blocked Dates",
+      "description": "Weekly working schedule configuration and specific offline blocks.",
+      "type": "object",
+      "properties": {
+        "intervalMinutes": { "type": "integer" },
+        "workingDays": {
+          "type": "array"
+        },
+        "blockedDates": {
+          "type": "array"
+        }
+      },
+      "required": ["intervalMinutes", "workingDays", "blockedDates"]
+    },
+    "Appointment": {
+      "title": "Scheduled Appointment Slot",
+      "description": "Completed or upcoming booked service slot from an end consumer.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "serviceId": { "type": "string" },
+        "serviceName": { "type": "string" },
+        "price": { "type": "number" },
+        "duration": { "type": "integer" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "customerEmail": { "type": "string", "format": "email" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "serviceId", "serviceName", "customerName", "customerPhone", "date", "time", "status", "createdAt"]
+    },
+    "Customer": {
+      "title": "Customer Record",
+      "description": "Consolidated client contact detail for automatic client tracing.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "totalAppointments": { "type": "integer" },
+        "lastAppointmentDate": { "type": "string" }
+      },
+      "required": ["id", "name", "phone", "totalAppointments"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "Security audit records for modification operations.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "action": { "type": "string" },
+        "target": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "details": { "type": "string" },
+        "userEmail": { "type": "string" }
+      },
+      "required": ["id", "action", "target", "timestamp", "details", "userEmail"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "SaaS professional profiles."
+    },
+    "/users/{userId}/services/{serviceId}": {
+      "schema": "Service",
+      "description": "Catalogs of services provided by the specific professional user."
+    },
+    "/users/{userId}/schedules/{scheduleId}": {
+      "schema": "Schedule",
+      "description": "Availability configuration settings for booking logic."
+    },
+    "/users/{userId}/appointments/{appointmentId}": {
+      "schema": "Appointment",
+      "description": "Schedules and bookings requested by clients."
+    },
+    "/users/{userId}/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Unique clients created on appointment booking."
+    },
+    "/users/{userId}/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Audit logging events for security and updates auditing."
+    }
+  }
+}

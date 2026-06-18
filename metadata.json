@@ -1,0 +1,6 @@
+{
+  "name": "Agenda Fácil",
+  "description": "SaaS moderno de agendamento online para profissionais autônomos e pequenas empresas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

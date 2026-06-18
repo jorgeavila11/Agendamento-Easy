@@ -1,0 +1,205 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. CATCH-ALL SAFETY NET: Default deny everything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. HELPER FUNCTIONS
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Enforce verified emails for professional users
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    // 3. SCHEMA VALIDATORS
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'phone', 'publicSlug']) &&
+             data.keys().size() >= 5 && data.keys().size() <= 8 &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() <= 150 &&
+             data.phone is string && data.phone.size() <= 30 &&
+             data.publicSlug is string && data.publicSlug.size() >= 3 && data.publicSlug.size() <= 50 &&
+             data.publicSlug.matches('^[a-z0-9\\-]+$');
+    }
+
+    function isValidService(data) {
+      return data.keys().hasAll(['id', 'name', 'duration', 'price', 'active', 'category', 'description']) &&
+             data.keys().size() == 7 &&
+             isValidId(data.id) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.duration is int && data.duration >= 5 && data.duration <= 480 &&
+             (data.price is int || data.price is float) && data.price >= 0.0 && data.price <= 50000.0 &&
+             data.active is bool &&
+             data.category is string && data.category.size() <= 50 &&
+             data.description is string && data.description.size() <= 1000;
+    }
+
+    function isValidSchedule(data) {
+      return data.keys().hasAll(['intervalMinutes', 'workingDays', 'blockedDates']) &&
+             data.keys().size() == 3 &&
+             data.intervalMinutes is int && (data.intervalMinutes == 15 || data.intervalMinutes == 30 || data.intervalMinutes == 45 || data.intervalMinutes == 60) &&
+             data.workingDays is list && data.workingDays.size() <= 7 &&
+             data.blockedDates is list && data.blockedDates.size() <= 100;
+    }
+
+    function isValidAppointment(data) {
+      return data.keys().hasAll(['id', 'serviceId', 'serviceName', 'price', 'duration', 'customerName', 'customerPhone', 'customerEmail', 'date', 'time', 'status', 'createdAt']) &&
+             (data.keys().size() == 12 || (data.keys().size() == 13 && data.keys().hasAll(['notes']))) &&
+             isValidId(data.id) &&
+             isValidId(data.serviceId) &&
+             data.serviceName is string && data.serviceName.size() > 0 && data.serviceName.size() <= 100 &&
+             (data.price is int || data.price is float) && data.price >= 0.0 &&
+             data.duration is int && data.duration > 0 &&
+             data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 100 &&
+             data.customerPhone is string && data.customerPhone.size() > 0 && data.customerPhone.size() <= 30 &&
+             data.customerEmail is string && data.customerEmail.size() <= 150 &&
+             data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+             data.time is string && data.time.matches('^\\d{2}:\\d{2}$') &&
+             data.status is string && (data.status == 'pending' || data.status == 'confirmed' || data.status == 'cancelled') &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000)) &&
+             data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    function isValidCustomer(data) {
+      return data.keys().hasAll(['id', 'name', 'phone', 'email', 'totalAppointments', 'lastAppointmentDate']) &&
+             data.keys().size() >= 6 && data.keys().size() <= 8 &&
+             isValidId(data.id) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() <= 30 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 150 &&
+             data.totalAppointments is int && data.totalAppointments >= 0 &&
+             data.lastAppointmentDate is string &&
+             (!('state' in data) || (data.state is string && data.state.size() <= 100)) &&
+             (!('city' in data) || (data.city is string && data.city.size() <= 100));
+    }
+
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['id', 'action', 'target', 'timestamp', 'details', 'userEmail']) &&
+             data.keys().size() == 6 &&
+             isValidId(data.id) &&
+             data.action is string && data.action.size() <= 100 &&
+             data.target is string && data.target.size() <= 200 &&
+             data.timestamp is string &&
+             data.details is string && data.details.size() <= 2000 &&
+             data.userEmail is string && data.userEmail.size() <= 150;
+    }
+
+    // 4. COLLECTION HOOKS
+
+    // WORKSPACE PROFISSIONAL (/users/{userId})
+    match /users/{userId} {
+      allow read: if true; // Public list and profile search needed for public slots
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && 
+                    incoming().uid == existing().uid && 
+                    incoming().email == existing().email;
+      allow delete: if isOwner(userId);
+
+      // SERVIÇOS DO PROFISSIONAL (/users/{userId}/services/{serviceId})
+      match /services/{serviceId} {
+        allow get: if true; // Public slot viewing requires list of services
+        allow list: if true; // Public scheduling cards require service listings
+        allow create: if isOwner(userId) && isValidId(serviceId) && isValidService(incoming());
+        allow update: if isOwner(userId) && isValidId(serviceId) && isValidService(incoming()) &&
+                      incoming().id == existing().id;
+        allow delete: if isOwner(userId);
+      }
+
+      // DISPONIBILIDADE DO PROFISSIONAL (/users/{userId}/schedules/{scheduleId})
+      match /schedules/{scheduleId} {
+        allow get: if true; // Public slot calculations
+        allow list: if true;
+        allow create: if isOwner(userId) && isValidId(scheduleId) && isValidSchedule(incoming());
+        allow update: if isOwner(userId) && isValidId(scheduleId) && isValidSchedule(incoming());
+        allow delete: if isOwner(userId);
+      }
+      // AGENDAMENTOS DO PROFISSIONAL (/users/{userId}/appointments/{appointmentId})
+      match /appointments/{appointmentId} {
+        // Anyone (clients and owner) can query the list of appointments to check slot conflicts or load client history
+        allow list: if true;
+        
+        // Anyone (clients) can fetch individual appointments if they know the ID for confirmation pages
+        allow get: if true; 
+
+        // Public booking triggers
+        allow create: if (isOwner(userId) && isValidId(appointmentId) && isValidAppointment(incoming())) ||
+                      (isValidId(appointmentId) && isValidAppointment(incoming()) &&
+                       incoming().status == 'pending'); // Forced initial state to pending for client creations
+
+        // Update routing: Professional updates status, cancels.
+        // No client is allowed to override service details or billing.
+        allow update: if (isOwner(userId) && isValidAppointment(incoming())) ||
+                      // Client updates: can only change status to 'cancelled' (cancel schedule)
+                      (isValidAppointment(incoming()) &&
+                       incoming().status == 'cancelled' &&
+                       existing().status != 'cancelled' && // Terminal check: cannot update if already cancelled
+                       incoming().id == existing().id &&
+                       incoming().serviceId == existing().serviceId &&
+                       incoming().serviceName == existing().serviceName &&
+                       incoming().price == existing().price &&
+                       incoming().duration == existing().duration &&
+                       incoming().customerName == existing().customerName &&
+                       incoming().customerPhone == existing().customerPhone &&
+                       incoming().date == existing().date &&
+                       incoming().time == existing().time);
+                       
+        allow delete: if isOwner(userId);
+      }
+
+      // LOGS DE AUDITORIA DO PROFISSIONAL (/users/{userId}/audit_logs/{logId})
+      match /audit_logs/{logId} {
+        allow read: if isOwner(userId);
+        allow create: if isValidId(logId) && isValidAuditLog(incoming());
+        allow update, delete: if false; // Logs are immutable
+      }
+
+      // CLIENTES DO PROFISSIONAL (/users/{userId}/customers/{customerId})
+      match /customers/{customerId} {
+        allow get, create, update: if true;
+        allow list, delete: if isOwner(userId);
+      }
+    }
+
+    // TOP-LEVEL COMPATIBLE AND EXTREMELY ROBUST SCHEDULING RULES FOR CLIENTS AND STAFF
+    match /users/{userId}/appointments/{appointmentId} {
+      allow get, list, create: if true;
+      allow update: if (isOwner(userId) && isValidAppointment(incoming())) ||
+                    (isValidAppointment(incoming()) &&
+                     incoming().status == 'cancelled' &&
+                     existing().status != 'cancelled' &&
+                     incoming().id == existing().id &&
+                     incoming().serviceId == existing().serviceId &&
+                     incoming().serviceName == existing().serviceName &&
+                     incoming().price == existing().price &&
+                     incoming().duration == existing().duration &&
+                     incoming().customerName == existing().customerName &&
+                     incoming().customerPhone == existing().customerPhone &&
+                     incoming().date == existing().date &&
+                     incoming().time == existing().time);
+      allow delete: if isOwner(userId);
+    }
+  }
+}
