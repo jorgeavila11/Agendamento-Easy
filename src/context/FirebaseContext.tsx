@@ -429,17 +429,65 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     const saved = localStorage.getItem('af_appointments');
-    return saved ? JSON.parse(saved) : DEFAULT_APPOINTMENTS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Appointment[];
+        if (Array.isArray(parsed)) {
+          const seen = new Set<string>();
+          return parsed.filter(item => {
+            if (!item || !item.id) return false;
+            if (seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to parse appointments:", e);
+      }
+    }
+    return DEFAULT_APPOINTMENTS;
   });
 
   const [customers, setCustomers] = useState<Customer[]>(() => {
     const saved = localStorage.getItem('af_customers');
-    return saved ? JSON.parse(saved) : DEFAULT_CUSTOMERS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Customer[];
+        if (Array.isArray(parsed)) {
+          const seen = new Set<string>();
+          return parsed.filter(item => {
+            if (!item || !item.id) return false;
+            if (seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to parse customers:", e);
+      }
+    }
+    return DEFAULT_CUSTOMERS;
   });
 
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     const saved = localStorage.getItem('af_notifications');
-    return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as AppNotification[];
+        if (Array.isArray(parsed)) {
+          const seen = new Set<string>();
+          return parsed.filter(item => {
+            if (!item || !item.id) return false;
+            if (seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to parse notifications:", e);
+      }
+    }
+    return DEFAULT_NOTIFICATIONS;
   });
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {

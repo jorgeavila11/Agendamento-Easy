@@ -12,6 +12,7 @@ import ProfileSettings from './components/ProfileSettings';
 import PublicBooking from './components/PublicBooking';
 import LoginView from './components/LoginView';
 import AuditLogsView from './components/AuditLogsView';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { 
   CalendarDays, 
   Settings, 
@@ -30,15 +31,22 @@ import {
   Info,
   LogOut,
   KeyRound,
-  Shield
+  Shield,
+  Sun,
+  Moon,
+  Monitor,
+  ChevronDown
 } from 'lucide-react';
 
 function AppContent() {
   const { user, isDemoLoggedIn, profile, notifications, signInWithGoogle, signOutUser, isFirebaseConnected, sessionClient, setSessionClient } = useFirebase();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'services' | 'schedule' | 'profile' | 'audit_logs'>('dashboard');
   const [viewMode, setViewMode] = useState<'admin' | 'public'>('admin');
+  const [themeOpen, setThemeOpen] = useState(false);
 
   const isProfessionalLoggedIn = user !== null || isDemoLoggedIn;
+  const isUserLoggedIn = isProfessionalLoggedIn || !!sessionClient;
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -82,6 +90,60 @@ function AppContent() {
 
           {/* Right Status indicators */}
           <div className="flex items-center gap-4">
+            {/* Elegant Dropdown Theme Switcher Widget */}
+            {isUserLoggedIn && (
+              <div className="relative">
+                <button
+                  onClick={() => setThemeOpen(!themeOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all select-none outline-none focus:ring-1 focus:ring-indigo-500/50"
+                >
+                  {theme === 'light' && <><Sun className="w-3.5 h-3.5 text-indigo-400" /> <span className="hidden sm:inline">Modo Claro</span></>}
+                  {theme === 'dark' && <><Moon className="w-3.5 h-3.5 text-indigo-400" /> <span className="hidden sm:inline">Modo Escuro</span></>}
+                  {theme === 'system' && <><Monitor className="w-3.5 h-3.5 text-indigo-400" /> <span className="hidden sm:inline">Sistema</span></>}
+                  {theme !== 'light' && theme !== 'dark' && theme !== 'system' && <><Monitor className="w-3.5 h-3.5 text-indigo-400" /> <span className="hidden sm:inline">Sistema</span></>}
+                  <ChevronDown className="w-3 h-3 text-slate-500" />
+                </button>
+                
+                {themeOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setThemeOpen(false)} />
+                    <div className="absolute right-0 mt-1.5 w-36 bg-slate-950 border border-slate-800 rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 animate-fade-in text-slate-300">
+                      <button
+                        onClick={() => {
+                          setTheme('light');
+                          setThemeOpen(false);
+                        }}
+                        className={`flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium cursor-pointer transition-colors outline-none ${theme === 'light' ? 'bg-indigo-600/15 text-indigo-400 font-bold' : 'hover:text-white hover:bg-slate-900'}`}
+                      >
+                        <Sun className="w-3.5 h-3.5" />
+                        <span>Claro</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTheme('dark');
+                          setThemeOpen(false);
+                        }}
+                        className={`flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium cursor-pointer transition-colors outline-none ${theme === 'dark' ? 'bg-indigo-600/15 text-indigo-400 font-bold' : 'hover:text-white hover:bg-slate-900'}`}
+                      >
+                        <Moon className="w-3.5 h-3.5" />
+                        <span>Escuro</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTheme('system');
+                          setThemeOpen(false);
+                        }}
+                        className={`flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium cursor-pointer transition-colors outline-none ${theme === 'system' ? 'bg-indigo-600/15 text-indigo-400 font-bold' : 'hover:text-white hover:bg-slate-900'}`}
+                      >
+                        <Monitor className="w-3.5 h-3.5" />
+                        <span>Sistema</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             {/* Quick guide helper */}
             <div className="text-slate-500 hover:text-slate-300 transition-colors hidden sm:block">
               <HelpCircle className="w-5 h-5 pointer-events-none" />
@@ -284,9 +346,11 @@ function AppContent() {
 
 export default function App() {
   return (
-    <FirebaseProvider>
-      <AppContent />
-    </FirebaseProvider>
+    <ThemeProvider>
+      <FirebaseProvider>
+        <AppContent />
+      </FirebaseProvider>
+    </ThemeProvider>
   );
 }
 

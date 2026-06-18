@@ -1,11 +1,56 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
+:root {
+  --app-slate-950: #020617;
+  --app-slate-900: #0f172a;
+  --app-slate-850: #1e293b;
+  --app-slate-800: #1e293b;
+  --app-slate-700: #334155;
+  --app-slate-600: #475569;
+  --app-slate-500: #64748b;
+  --app-slate-400: #94a3b8;
+  --app-slate-300: #cbd5e1;
+  --app-slate-200: #cbd5e1;
+  --app-slate-100: #f1f5f9;
+  --app-slate-50: #f8fafc;
+}
+
+/* Light mode definitions remapping standard slate colors dynamically */
+.light {
+  --app-slate-950: #f8fafc; /* Page Background (Slate 50) */
+  --app-slate-900: #ffffff; /* Card Backgrounds (White) */
+  --app-slate-850: #f1f5f9; /* Input/Panel backgrounds (Slate 100) */
+  --app-slate-800: #e2e8f0; /* Borders (Slate 200) */
+  --app-slate-700: #cbd5e1; /* Focus states/Hovers (Slate 300) */
+  --app-slate-600: #94a3b8;
+  --app-slate-500: #64748b; /* Muted texts */
+  --app-slate-400: #475569; /* Secondary texts (Slate 600) */
+  --app-slate-300: #334155; /* Inner headings (Slate 700) */
+  --app-slate-200: #1e293b; /* General body reading text (Slate 800) */
+  --app-slate-100: #0f172a; /* Bold headings and titles (Slate 900) */
+  --app-slate-50: #020617;  /* High contrast elements */
+}
+
 @theme {
   --color-primary: #4f46e5;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-display: "Space Grotesk", sans-serif;
+  
+  /* Bind standard Slate colors to adapt dynamically based on the applied HTML root selector pattern */
+  --color-slate-950: var(--app-slate-950);
+  --color-slate-900: var(--app-slate-900);
+  --color-slate-850: var(--app-slate-850);
+  --color-slate-800: var(--app-slate-800);
+  --color-slate-700: var(--app-slate-700);
+  --color-slate-600: var(--app-slate-600);
+  --color-slate-500: var(--app-slate-500);
+  --color-slate-400: var(--app-slate-400);
+  --color-slate-300: var(--app-slate-300);
+  --color-slate-200: var(--app-slate-200);
+  --color-slate-100: var(--app-slate-100);
+  --color-slate-50: var(--app-slate-50);
   
   @keyframes fade-in {
     from { opacity: 0; transform: translateY(6px); }
@@ -34,4 +79,32 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Custom fine-tuning for light mode rendering high-contrast texts */
+.light .text-white:not(
+  button *, 
+  [class*="bg-indigo-"] *, 
+  [class*="bg-emerald-"] *, 
+  [class*="bg-red-"] *, 
+  [class*="bg-violet-"] *,
+  .bg-indigo-600,
+  .bg-emerald-600,
+  .bg-red-600,
+  .bg-indigo-505
+) {
+  color: #0f172a !important; /* dark slate for headings that are styled as text-white in dark mode */
+}
+
+.light .text-neutral-200, .light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+.light input, .light select, .light textarea {
+  color: #0f172a !important;
+}
+
+.light input::placeholder, .light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
 

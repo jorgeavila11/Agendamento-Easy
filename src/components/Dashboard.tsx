@@ -276,9 +276,9 @@ export default function Dashboard() {
             {notifications.length === 0 ? (
               <p className="text-center py-8 text-xs text-slate-500 italic">Nenhuma notificação recente.</p>
             ) : (
-              notifications.map((notif) => (
+              notifications.map((notif, idx) => (
                 <div 
-                  key={notif.id} 
+                  key={`${notif.id}-${idx}`} 
                   onClick={() => markNotificationRead(notif.id)}
                   className={`flex gap-3 cursor-pointer p-1 rounded-lg transition-all ${notif.read ? 'opacity-40 hover:opacity-75' : 'hover:bg-slate-800/30'}`}
                 >
