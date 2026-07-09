@@ -229,7 +229,7 @@ export default function ScheduleSettings() {
                 <div key={block.id} className="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-800 rounded-xl">
                   <div>
                     <p className="text-xs text-white font-semibold font-mono">
-                      {block.date.split('-').reverse().join('/')}
+                      {(block.date || "").split('-').reverse().join('/') || 'Sem data'}
                     </p>
                     <p className="text-[10px] text-neutral-500">{block.reason}</p>
                   </div>

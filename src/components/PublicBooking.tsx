@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../context/FirebaseContext';
 import { Service, Appointment } from '../types';
+import { maskBrazilianPhone } from '../utils/phoneMask';
 import { 
   Calendar, 
   Clock, 
@@ -30,6 +31,13 @@ const WEEKDAYS = [
   'Sábado'
 ];
 
+const MONTH_NAMES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+const WEEKDAY_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
 export default function PublicBooking() {
   const { 
     profile, 
@@ -45,8 +53,75 @@ export default function PublicBooking() {
 
   // Booking Flow Steps
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('2026-06-16'); // default matching mockup
+  
+  // Today's date helper
+  const getTodayDateStr = () => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  const todayStr = getTodayDateStr();
+
+  // Selected date state (defaults to today's date formatted as YYYY-MM-DD)
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    return getTodayDateStr();
+  });
+  
   const [selectedTime, setSelectedTime] = useState<string>('');
+
+  // Calendar Month Navigation states (default to current month/year)
+  const [currentMonth, setCurrentMonth] = useState<number>(() => {
+    const today = new Date();
+    return today.getMonth(); // 0-indexed: 0 = Jan, 6 = Jul, etc.
+  });
+  const [currentYear, setCurrentYear] = useState<number>(() => {
+    const today = new Date();
+    return today.getFullYear();
+  });
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(prev => {
+      if (prev === 0) {
+        setCurrentYear(y => y - 1);
+        return 11;
+      }
+      return prev - 1;
+    });
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(prev => {
+      if (prev === 11) {
+        setCurrentYear(y => y + 1);
+        return 0;
+      }
+      return prev + 1;
+    });
+  };
+
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfWeek = (year: number, month: number) => {
+    return new Date(year, month, 1).getDay(); // 0 = Sunday, 1 = Monday, etc.
+  };
+
+  const formatPrettySelectedDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    try {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      const formatted = date.toLocaleDateString('pt-BR', options);
+      return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    } catch (e) {
+      return dateStr;
+    }
+  };
   
   // Registration Dialog
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -81,36 +156,6 @@ export default function PublicBooking() {
     }
   }, [services, selectedService]);
 
-  // Generate simple 14-day booking calendar range (starting today June 16, 2026)
-  const [calendarDays, setCalendarDays] = useState<{ date: string; dayLabel: string; isBlocked: boolean; dayOfWeek: number }[]>([]);
-  
-  useEffect(() => {
-    const days = [];
-    const baseDate = new Date('2026-06-16T12:00:00'); // stable UTC/Local mock starting June 16th, 2026
-    
-    for (let i = 0; i < 14; i++) {
-      const d = new Date(baseDate);
-      d.setDate(baseDate.getDate() + i);
-      const dateStr = d.toISOString().substring(0, 10); // "YYYY-MM-DD"
-      const dayOfWeek = d.getDay();
-      
-      // Determine if date setting enabled
-      const daySetting = profile.workingSettings.workingDays.find(w => w.dayOfWeek === dayOfWeek);
-      const isDayOff = !daySetting || !daySetting.enabled;
-      
-      // Check custom blocklist
-      const isCustomBlock = profile.workingSettings.blockedDates.some(b => b.date === dateStr);
-      
-      days.push({
-        date: dateStr,
-        dayLabel: d.getDate().toString(),
-        dayOfWeek,
-        isBlocked: isDayOff || isCustomBlock
-      });
-    }
-    setCalendarDays(days);
-  }, [profile]);
-
   // Generate available hourly slots based on the selectedDate setting and interval
   const [availableSlots, setAvailableSlots] = useState<{ time: string; isTaken: boolean }[]>([]);
 
@@ -135,9 +180,9 @@ export default function PublicBooking() {
 
     // Generate times range start -> end
     const slots = [];
-    let [startH, startM] = daySetting.startTime.split(':').map(Number);
-    const [endH, endM] = daySetting.endTime.split(':').map(Number);
-    const interval = profile.workingSettings.intervalMinutes;
+    let [startH, startM] = (daySetting.startTime || '09:00').split(':').map(Number);
+    const [endH, endM] = (daySetting.endTime || '18:00').split(':').map(Number);
+    const interval = profile.workingSettings.intervalMinutes || 30;
 
     let currentMinutes = startH * 60 + startM;
     const endMinutes = endH * 60 + endM;
@@ -469,9 +514,9 @@ export default function PublicBooking() {
                 <label className="text-xs text-neutral-400 block font-bold">Telefone Celular Cadastrado</label>
                 <input 
                   type="text" required
-                  placeholder="Ex: (11) 99999-9999"
+                  placeholder="Ex: (88) 9 9761-4430"
                   className="w-full px-4 py-2 bg-neutral-950 border border-neutral-800 text-xs text-white rounded-xl outline-none focus:border-primary placeholder-neutral-700 font-medium"
-                  value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)}
+                  value={customerPhone} onChange={(e) => setCustomerPhone(maskBrazilianPhone(e.target.value))}
                 />
               </div>
             ) : (
@@ -490,9 +535,9 @@ export default function PublicBooking() {
                     <label className="text-xs text-neutral-400 block font-bold">Telefone Celular *</label>
                     <input 
                       type="text" required
-                      placeholder="Ex: (11) 99999-9999"
+                      placeholder="Ex: (88) 9 9761-4430"
                       className="w-full px-4 py-2 bg-neutral-950 border border-neutral-800 text-xs text-white rounded-xl outline-none focus:border-primary placeholder-neutral-700 font-medium"
-                      value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)}
+                      value={customerPhone} onChange={(e) => setCustomerPhone(maskBrazilianPhone(e.target.value))}
                     />
                   </div>
                 </div>
@@ -651,39 +696,111 @@ export default function PublicBooking() {
         <div className="lg:col-span-5 space-y-6">
           {/* Step 2: Datepicker list */}
           <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-xl space-y-4">
-            <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-widest flex items-center gap-2 select-none">
-              <span className="bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">2</span>
-              Escolha a Data Disponível
-            </h4>
-
-            {/* Micro horizontal horizontal scrolling day card pickers */}
-            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-              {calendarDays.map((day) => {
-                const isSelected = selectedDate === day.date;
-                return (
-                  <button
-                    key={day.date}
-                    disabled={day.isBlocked}
-                    onClick={() => {
-                      setSelectedDate(day.date);
-                      setSelectedTime('');
-                    }}
-                    className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-xl border shrink-0 w-14 transition-all ${day.isBlocked ? 'opacity-30 cursor-not-allowed border-transparent bg-transparent' : isSelected ? 'border-primary bg-primary text-white shadow-lg' : 'border-neutral-850 hover:border-neutral-600 bg-neutral-950 text-neutral-350'}`}
-                  >
-                    <span className="text-[9px] font-bold uppercase tracking-wider">
-                      {WEEKDAYS[day.dayOfWeek].slice(0, 3)}
-                    </span>
-                    <span className="text-sm font-extrabold mt-1">
-                      {day.dayLabel}
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="flex items-center justify-between pb-2">
+              <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-widest flex items-center gap-2 select-none">
+                <span className="bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">2</span>
+                Escolha a Data Disponível
+              </h4>
             </div>
-            
-            <p className="text-[10px] text-neutral-500 font-semibold font-mono text-center">
-              Período de agendamento selecionado: Junho 2026
-            </p>
+
+            {/* Calendar Component */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between bg-neutral-950 p-3 rounded-xl border border-neutral-850">
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  className="p-1.5 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  title="Mês Anterior"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-bold text-white uppercase tracking-wider select-none font-sans">
+                  {MONTH_NAMES[currentMonth]} {currentYear}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  className="p-1.5 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  title="Próximo Mês"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Weekday Titles */}
+              <div className="grid grid-cols-7 gap-1 text-center text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                {WEEKDAY_SHORT.map(wd => (
+                  <div key={wd} className="py-1">{wd}</div>
+                ))}
+              </div>
+
+              {/* Days Grid */}
+              <div className="grid grid-cols-7 gap-1.5">
+                {/* Empty slots for starting alignment */}
+                {Array.from({ length: getFirstDayOfWeek(currentYear, currentMonth) }).map((_, idx) => (
+                  <div key={`empty-${idx}`} className="aspect-square" />
+                ))}
+
+                {/* Days of the month */}
+                {Array.from({ length: getDaysInMonth(currentYear, currentMonth) }).map((_, idx) => {
+                  const dayNum = idx + 1;
+                  const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                  
+                  const dateObj = new Date(currentYear, currentMonth, dayNum);
+                  const dayOfWeek = dateObj.getDay();
+                  
+                  // Past verification
+                  const isPast = dateStr < todayStr;
+                  
+                  // Working days verification
+                  const daySetting = profile.workingSettings.workingDays.find(w => w.dayOfWeek === dayOfWeek);
+                  const isDayOff = !daySetting || !daySetting.enabled;
+                  
+                  // Custom blocked verification
+                  const isCustomBlock = profile.workingSettings.blockedDates.some(b => b.date === dateStr);
+                  
+                  const isBlocked = isPast || isDayOff || isCustomBlock;
+                  const isSelected = selectedDate === dateStr;
+
+                  let tooltip = `Dia ${dayNum}`;
+                  if (isPast) tooltip += ' (Passado)';
+                  else if (isCustomBlock) tooltip += ' (Bloqueado/Feriado)';
+                  else if (isDayOff) tooltip += ' (Não atendemos)';
+                  
+                  return (
+                    <button
+                      key={dateStr}
+                      type="button"
+                      disabled={isBlocked}
+                      title={tooltip}
+                      onClick={() => {
+                        setSelectedDate(dateStr);
+                        setSelectedTime('');
+                      }}
+                      className={`aspect-square flex items-center justify-center rounded-lg border text-xs font-extrabold font-mono transition-all relative ${
+                        isBlocked 
+                          ? 'border-transparent bg-neutral-950/20 text-neutral-700 cursor-not-allowed opacity-30' 
+                          : isSelected 
+                            ? 'bg-primary border-primary text-white shadow-lg' 
+                            : 'bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900 cursor-pointer'
+                      }`}
+                    >
+                      <span>{dayNum}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Selected date label display */}
+              <div className="pt-2 border-t border-neutral-850 text-center space-y-1">
+                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider block">
+                  Data Selecionada
+                </span>
+                <span className="text-xs font-extrabold text-indigo-400">
+                  {formatPrettySelectedDate(selectedDate)}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Step 3: Slots picker list */}
@@ -841,9 +958,9 @@ export default function PublicBooking() {
                         <label className="text-xs text-neutral-400 block font-medium">Seu Telefone de Cadastro</label>
                         <input 
                           type="text" required
-                          placeholder="Ex: (11) 99999-9999"
+                          placeholder="Ex: (88) 9 9761-4430"
                           className="w-full px-3 py-2 bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg outline-none focus:border-primary placeholder-neutral-700"
-                          value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)}
+                          value={customerPhone} onChange={(e) => setCustomerPhone(maskBrazilianPhone(e.target.value))}
                         />
                       </div>
                     </div>
@@ -867,9 +984,9 @@ export default function PublicBooking() {
                         <label className="text-xs text-neutral-400 block font-medium">Telefone de Contato *</label>
                         <input 
                           type="text" required
-                          placeholder="Ex: (11) 99999-9999"
+                          placeholder="Ex: (88) 9 9761-4430"
                           className="w-full px-3 py-2 bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg outline-none focus:border-primary placeholder-neutral-700"
-                          value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)}
+                          value={customerPhone} onChange={(e) => setCustomerPhone(maskBrazilianPhone(e.target.value))}
                         />
                       </div>
 

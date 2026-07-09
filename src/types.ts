@@ -12,6 +12,8 @@ export interface ProfessionalProfile {
   address?: string;
   publicSlug: string; // custom public link slug
   workingSettings: WorkingSettings;
+  whatsappPhoneNumberId?: string;
+  whatsappToken?: string;
 }
 
 export interface WorkingSettings {

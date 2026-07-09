@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFirebase } from '../../context/FirebaseContext';
+import { maskBrazilianPhone } from '../../utils/phoneMask';
 import { 
   Mail, 
   Lock, 
@@ -180,10 +181,10 @@ export default function BusinessAuth({ onSetFeedback }: BusinessAuthProps) {
                     <input 
                       type="text"
                       required
-                      placeholder="Ex: (11) 98765-4321"
+                      placeholder="Ex: (88) 9 9761-4430"
                       className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 text-white text-xs rounded-xl outline-none"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => setPhone(maskBrazilianPhone(e.target.value))}
                     />
                   </div>
                 </div>

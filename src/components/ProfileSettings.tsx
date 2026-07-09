@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFirebase } from '../context/FirebaseContext';
-import { User, Phone, MapPin, Globe, Save } from 'lucide-react';
+import { User, Phone, MapPin, Globe, Save, MessageSquare } from 'lucide-react';
 
 export default function ProfileSettings() {
   const { profile, updateProfile } = useFirebase();
@@ -11,6 +11,8 @@ export default function ProfileSettings() {
   const [address, setAddress] = useState(profile.address || '');
   const [publicSlug, setPublicSlug] = useState(profile.publicSlug);
   const [photoUrl, setPhotoUrl] = useState(profile.photoUrl || '');
+  const [whatsappPhoneNumberId, setWhatsappPhoneNumberId] = useState(profile.whatsappPhoneNumberId || '');
+  const [whatsappToken, setWhatsappToken] = useState(profile.whatsappToken || '');
   const [isSaved, setIsSaved] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -21,7 +23,9 @@ export default function ProfileSettings() {
       description,
       address,
       publicSlug: publicSlug.toLowerCase().replace(/[^a-z0-9\-]/g, ''),
-      photoUrl
+      photoUrl,
+      whatsappPhoneNumberId,
+      whatsappToken
     });
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
@@ -139,6 +143,45 @@ export default function ProfileSettings() {
               value={address} 
               onChange={(e) => setAddress(e.target.value)} 
             />
+          </div>
+        </div>
+
+        {/* WhatsApp Business API Configuration */}
+        <div className="pt-6 border-t border-neutral-800 space-y-4">
+          <div>
+            <h4 className="text-base font-bold text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-emerald-500" />
+              Notificações de WhatsApp (Meta Business API)
+            </h4>
+            <p className="text-xs text-neutral-400 mt-1">
+              Configure as credenciais oficiais da sua conta no Facebook Developer para enviar mensagens reais quando os agendamentos forem confirmados.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-300 block">ID do Número de Telefone (Phone Number ID)</label>
+              <input 
+                type="text" 
+                className="w-full px-4 py-2.5 border border-neutral-800 rounded-xl bg-neutral-950 focus:border-primary focus:ring-1 focus:ring-primary text-white outline-none text-sm font-mono"
+                placeholder="Ex: 911523022053417"
+                value={whatsappPhoneNumberId} 
+                onChange={(e) => setWhatsappPhoneNumberId(e.target.value.trim())} 
+              />
+              <p className="text-[10px] text-neutral-500">Deixe em branco ou use "911523022053417" para o número de teste oficial.</p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-300 block">Token de Acesso Permanente (Access Token)</label>
+              <input 
+                type="password" 
+                className="w-full px-4 py-2.5 border border-neutral-800 rounded-xl bg-neutral-950 focus:border-primary focus:ring-1 focus:ring-primary text-white outline-none text-sm font-mono"
+                placeholder="EAAG..."
+                value={whatsappToken} 
+                onChange={(e) => setWhatsappToken(e.target.value.trim())} 
+              />
+              <p className="text-[10px] text-neutral-500">Insira seu Token de Acesso Permanente gerado no portal Meta Business Suite.</p>
+            </div>
           </div>
         </div>
 

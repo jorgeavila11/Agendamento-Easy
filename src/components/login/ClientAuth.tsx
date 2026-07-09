@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFirebase } from '../../context/FirebaseContext';
+import { maskBrazilianPhone } from '../../utils/phoneMask';
 import { 
   User, 
   Phone, 
@@ -464,17 +465,17 @@ export default function ClientAuth({ onSetFeedback }: ClientAuthProps) {
               </div>
             )}
 
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase block">Telefone de Contato</label>
+            <div className="space-y-1 font-sans">
+              <label className="text-[10px] font-bold text-slate-400 uppercase block">Telefone de Contato *</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input 
                   type="text"
                   required
-                  placeholder="(11) 99111-2222"
+                  placeholder="(88) 9 9761-4430"
                   className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-550 text-white text-xs rounded-xl outline-none"
                   value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
+                  onChange={(e) => setClientPhone(maskBrazilianPhone(e.target.value))}
                 />
               </div>
             </div>

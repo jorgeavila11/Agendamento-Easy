@@ -40,7 +40,7 @@ import {
 
 function AppContent() {
   const { user, isDemoLoggedIn, profile, notifications, signInWithGoogle, signOutUser, isFirebaseConnected, sessionClient, setSessionClient } = useFirebase();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'services' | 'schedule' | 'profile' | 'audit_logs'>('dashboard');
   const [viewMode, setViewMode] = useState<'admin' | 'public'>('admin');
   const [themeOpen, setThemeOpen] = useState(false);
@@ -49,13 +49,34 @@ function AppContent() {
   const isUserLoggedIn = isProfessionalLoggedIn || !!sessionClient;
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    const shouldApplyTheme = isProfessionalLoggedIn && viewMode === 'admin';
+
+    if (!shouldApplyTheme) {
+      root.classList.add('dark');
+      root.classList.remove('light');
+      root.style.colorScheme = 'dark';
+    } else {
+      if (resolvedTheme === 'dark') {
+        root.classList.add('dark');
+        root.classList.remove('light');
+        root.style.colorScheme = 'dark';
+      } else {
+        root.classList.add('light');
+        root.classList.remove('dark');
+        root.style.colorScheme = 'light';
+      }
+    }
+  }, [isProfessionalLoggedIn, viewMode, resolvedTheme]);
+
   return (
     <div id="agenda-facil-root" className="min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col selection:bg-primary selection:text-white">
       {/* Top Professional Navigation Header */}
       <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           {/* Logo Brand Brand */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex-1 flex justify-start items-center gap-2.5">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md">
               AF
             </div>
@@ -70,7 +91,7 @@ function AppContent() {
 
           {/* Center Mode Switcher (Interactive Sandbox Experience) */}
           {isProfessionalLoggedIn && (
-            <div className="p-1 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-1">
+            <div className="shrink-0 p-1 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-1">
               <button
                 onClick={() => setViewMode('admin')}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 outline-none cursor-pointer ${viewMode === 'admin' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
@@ -89,9 +110,9 @@ function AppContent() {
           )}
 
           {/* Right Status indicators */}
-          <div className="flex items-center gap-4">
+          <div className="flex-1 flex justify-end items-center gap-4">
             {/* Elegant Dropdown Theme Switcher Widget */}
-            {isUserLoggedIn && (
+            {isProfessionalLoggedIn && viewMode === 'admin' && (
               <div className="relative">
                 <button
                   onClick={() => setThemeOpen(!themeOpen)}

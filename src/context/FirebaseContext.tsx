@@ -33,6 +33,8 @@ import {
   WorkingSettings,
   AuditLog
 } from '../types';
+import { sendWhatsAppConfirmation } from '../utils/whatsapp';
+import { encryptText, decryptText } from '../utils/crypto';
 
 export enum OperationType {
   CREATE = 'create',
@@ -68,7 +70,7 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, shouldThrow: boolean = false) {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -86,7 +88,9 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     path
   };
   console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  if (shouldThrow) {
+    throw new Error(JSON.stringify(errInfo));
+  }
 }
 
 // Helper sanitizers to strictly enforce firestore.rules schemas and keys
@@ -99,7 +103,9 @@ function sanitizeUser(user: any, uid: string): any {
     description: user.description || "",
     photoUrl: user.photoUrl || "",
     address: user.address || "",
-    publicSlug: user.publicSlug || `pro-${uid.slice(0, 6)}`
+    publicSlug: user.publicSlug || `pro-${uid.slice(0, 6)}`,
+    whatsappPhoneNumberId: user.whatsappPhoneNumberId || "",
+    whatsappToken: user.whatsappToken || ""
   };
 }
 
@@ -208,6 +214,8 @@ const DEFAULT_PROFILE: ProfessionalProfile = {
   address: 'Rua das Flores, 450 - Jardins, São Paulo - SP',
   publicSlug: 'studio-essence',
   photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBmZAx-iTYeZTlu08pJIRDHgulDQ22Qkc-s0S9JMPEOm6N4zpBH2_R3G0CCpoVuHEkIEVB6_JnYEaNroWwguF15kkvfZ40cRXvqGoarUDXAoXCTIYoQwNJlY8iM5DYwYTjezUSqS33XBmUAXP0W2rTsfzBXDb_pKOMdgj4iObs_LQWGEBlogUJGKsNKX-Lw6jozozCz8U2awlIX9ghHDqNwu1Zuz-UtwwcvIjZeAI9B9kIA3qUP5ELwvPLTYraNsPDXllQK9dU-7w',
+  whatsappPhoneNumberId: '911523022053417',
+  whatsappToken: '',
   workingSettings: {
     intervalMinutes: 30,
     workingDays: [
@@ -274,11 +282,11 @@ const DEFAULT_APPOINTMENTS: Appointment[] = [
     customerName: 'Sarah Jenkins',
     customerPhone: '(11) 99111-2222',
     customerEmail: 'sarah.jenkins@gmail.com',
-    date: '2026-06-16',
+    date: '2026-07-09',
     time: '09:00',
     status: 'confirmed',
     notes: 'Solicitou corte degradê bem baixo',
-    createdAt: '2026-06-15T14:30:00Z'
+    createdAt: '2026-07-08T14:30:00Z'
   },
   {
     id: 'app_2',
@@ -289,11 +297,11 @@ const DEFAULT_APPOINTMENTS: Appointment[] = [
     customerName: 'Mariana Silva',
     customerPhone: '(11) 99222-3333',
     customerEmail: 'mariana.silva@hotmail.com',
-    date: '2026-06-16',
+    date: '2026-07-09',
     time: '14:00',
     status: 'confirmed',
     notes: 'Trazer imagem de referência de cor loira perolada',
-    createdAt: '2026-06-14T10:15:00Z'
+    createdAt: '2026-07-07T10:15:00Z'
   },
   {
     id: 'app_3',
@@ -304,11 +312,11 @@ const DEFAULT_APPOINTMENTS: Appointment[] = [
     customerName: 'Mike Ross',
     customerPhone: '(11) 99333-4444',
     customerEmail: 'mike.ross@pearson.com',
-    date: '2026-06-17',
+    date: '2026-07-10',
     time: '10:15',
     status: 'pending',
     notes: 'Agendou pelo link público',
-    createdAt: '2026-06-16T08:00:00Z'
+    createdAt: '2026-07-09T08:00:00Z'
   },
   {
     id: 'app_4',
@@ -319,10 +327,10 @@ const DEFAULT_APPOINTMENTS: Appointment[] = [
     customerName: 'Emma Wilson',
     customerPhone: '(11) 99444-5555',
     customerEmail: 'emma.wilson@techcorp.com',
-    date: '2026-06-17',
+    date: '2026-07-10',
     time: '11:00',
     status: 'pending',
-    createdAt: '2026-06-16T09:12:00Z'
+    createdAt: '2026-07-09T09:12:00Z'
   }
 ];
 
@@ -333,7 +341,7 @@ const DEFAULT_CUSTOMERS: Customer[] = [
     phone: '(11) 99111-2222',
     email: 'sarah.jenkins@gmail.com',
     totalAppointments: 3,
-    lastAppointmentDate: '2026-06-16 09:00'
+    lastAppointmentDate: '2026-07-09 09:00'
   },
   {
     id: 'cust_992223333',
@@ -341,7 +349,7 @@ const DEFAULT_CUSTOMERS: Customer[] = [
     phone: '(11) 99222-3333',
     email: 'mariana.silva@hotmail.com',
     totalAppointments: 5,
-    lastAppointmentDate: '2026-06-16 14:00'
+    lastAppointmentDate: '2026-07-09 14:00'
   },
   {
     id: 'cust_993334444',
@@ -349,7 +357,7 @@ const DEFAULT_CUSTOMERS: Customer[] = [
     phone: '(11) 99333-4444',
     email: 'mike.ross@pearson.com',
     totalAppointments: 1,
-    lastAppointmentDate: '2026-06-17 10:15'
+    lastAppointmentDate: '2026-07-10 10:15'
   },
   {
     id: 'cust_994445555',
@@ -357,7 +365,7 @@ const DEFAULT_CUSTOMERS: Customer[] = [
     phone: '(11) 99444-5555',
     email: 'emma.wilson@techcorp.com',
     totalAppointments: 2,
-    lastAppointmentDate: '2026-06-17 11:00'
+    lastAppointmentDate: '2026-07-10 11:00'
   }
 ];
 
@@ -366,17 +374,17 @@ const DEFAULT_NOTIFICATIONS: AppNotification[] = [
     id: 'not_1',
     type: 'confirm',
     title: 'Novo agendamento efetuado!',
-    message: 'Sarah Jenkins agendou Corte Masculino Premium para terça-feira, 16 de Junho às 09:00.',
+    message: 'Sarah Jenkins agendou Corte Masculino Premium para quinta-feira, 09 de Julho às 09:00.',
     read: false,
-    timestamp: '2026-06-15T14:30:00Z'
+    timestamp: '2026-07-08T14:30:00Z'
   },
   {
     id: 'not_2',
     type: 'confirm',
     title: 'Novo pedido pendente',
-    message: 'Mike Ross solicitou Design de Sobrancelha para quarta-feira, 17 de Junho às 10:15.',
+    message: 'Mike Ross solicitou Design de Sobrancelha para sexta-feira, 10 de Julho às 10:15.',
     read: false,
-    timestamp: '2026-06-16T08:00:00Z'
+    timestamp: '2026-07-09T08:00:00Z'
   }
 ];
 
@@ -433,6 +441,14 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         const parsed = JSON.parse(saved) as Appointment[];
         if (Array.isArray(parsed)) {
+          // Auto-migrate: If cached appointments are only from June 2026, clear and reset to July 2026 defaults
+          const hasJuneOnly = parsed.length > 0 && parsed.every(item => item.date && item.date.startsWith('2026-06-'));
+          if (hasJuneOnly) {
+            localStorage.removeItem('af_appointments');
+            localStorage.removeItem('af_customers');
+            localStorage.removeItem('af_notifications');
+            return DEFAULT_APPOINTMENTS;
+          }
           const seen = new Set<string>();
           return parsed.filter(item => {
             if (!item || !item.id) return false;
@@ -628,8 +644,22 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               description: userData.description || DEFAULT_PROFILE.description,
               photoUrl: userData.photoUrl || DEFAULT_PROFILE.photoUrl,
               address: userData.address || DEFAULT_PROFILE.address,
-              publicSlug: userData.publicSlug || DEFAULT_PROFILE.publicSlug
+              publicSlug: userData.publicSlug || DEFAULT_PROFILE.publicSlug,
+              whatsappPhoneNumberId: userData.whatsappPhoneNumberId || '',
+              whatsappToken: userData.whatsappToken || ''
             }));
+
+            const encryptedToken = userData.whatsappToken || '';
+            if (encryptedToken) {
+              decryptText(encryptedToken, userId).then(decrypted => {
+                setProfile(prev => {
+                  if (prev.uid === userId) {
+                    return { ...prev, whatsappToken: decrypted };
+                  }
+                  return prev;
+                });
+              });
+            }
 
             // Sync other subcollections in real-time
             try {
@@ -674,7 +704,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 snap.forEach(doc => {
                   list.push(doc.data() as Appointment);
                 });
-                list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+                list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
                 setAppointments(list);
               }, (error) => {
                 console.error("Public appointments sync error:", error);
@@ -774,12 +804,26 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               description: data.description,
               photoUrl: data.photoUrl,
               address: data.address,
-              publicSlug: data.publicSlug
+              publicSlug: data.publicSlug,
+              whatsappPhoneNumberId: data.whatsappPhoneNumberId || '',
+              whatsappToken: data.whatsappToken || ''
             }));
+
+            const encryptedToken = data.whatsappToken || '';
+            if (encryptedToken) {
+              decryptText(encryptedToken, userId).then(decrypted => {
+                setProfile(prev => {
+                  if (prev.uid === userId) {
+                    return { ...prev, whatsappToken: decrypted };
+                  }
+                  return prev;
+                });
+              });
+            }
           }
         }, (error) => {
           if (auth.currentUser?.uid === userId) {
-            handleFirestoreError(error, OperationType.GET, `users/${userId}`);
+            handleFirestoreError(error, OperationType.GET, `users/${userId}`, false);
           }
         });
         activeUnsubscribers.push(unsubscribeProfile);
@@ -798,7 +842,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         }, (error) => {
           if (auth.currentUser?.uid === userId) {
-            handleFirestoreError(error, OperationType.GET, `users/${userId}/schedules/default_schedule`);
+            handleFirestoreError(error, OperationType.GET, `users/${userId}/schedules/default_schedule`, false);
           }
         });
         activeUnsubscribers.push(unsubscribeSchedule);
@@ -811,7 +855,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setServices(list);
         }, (error) => {
           if (auth.currentUser?.uid === userId) {
-            handleFirestoreError(error, OperationType.GET, `users/${userId}/services`);
+            handleFirestoreError(error, OperationType.GET, `users/${userId}/services`, false);
           }
         });
         activeUnsubscribers.push(unsubscribeServices);
@@ -822,11 +866,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             list.push(doc.data() as Appointment);
           });
           // Sort appointments descending
-          list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+          list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
           setAppointments(list);
         }, (error) => {
           if (auth.currentUser?.uid === userId) {
-            handleFirestoreError(error, OperationType.GET, `users/${userId}/appointments`);
+            handleFirestoreError(error, OperationType.GET, `users/${userId}/appointments`, false);
           }
         });
         activeUnsubscribers.push(unsubscribeAppointments);
@@ -839,7 +883,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setCustomers(list);
         }, (error) => {
           if (auth.currentUser?.uid === userId) {
-            handleFirestoreError(error, OperationType.GET, `users/${userId}/customers`);
+            handleFirestoreError(error, OperationType.GET, `users/${userId}/customers`, false);
           }
         });
         activeUnsubscribers.push(unsubscribeCustomers);
@@ -850,11 +894,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             list.push(doc.data() as AuditLog);
           });
           // Sort audit logs descending by timestamp
-          list.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+          list.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
           setAuditLogs(list);
         }, (error) => {
           if (auth.currentUser?.uid === userId) {
-            handleFirestoreError(error, OperationType.GET, `users/${userId}/audit_logs`);
+            handleFirestoreError(error, OperationType.GET, `users/${userId}/audit_logs`, false);
           }
         });
         activeUnsubscribers.push(unsubscribeAuditLogs);
@@ -930,7 +974,15 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (auth.currentUser) {
       const path = `users/${auth.currentUser.uid}`;
       try {
-        const sanitized = sanitizeUser({ ...profile, ...updates }, auth.currentUser.uid);
+        let encryptedUpdates = { ...updates };
+        if (updates.whatsappToken !== undefined) {
+          if (updates.whatsappToken) {
+            encryptedUpdates.whatsappToken = await encryptText(updates.whatsappToken, auth.currentUser.uid);
+          } else {
+            encryptedUpdates.whatsappToken = '';
+          }
+        }
+        const sanitized = sanitizeUser({ ...profile, ...encryptedUpdates }, auth.currentUser.uid);
         await setDoc(doc(db, 'users', auth.currentUser.uid), sanitized, { merge: true });
       } catch (err) {
         handleFirestoreError(err, OperationType.WRITE, path);
@@ -1118,12 +1170,21 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     setNotifications(prev => [newNotif, ...prev]);
 
+    if (appointment.status === 'confirmed') {
+      sendWhatsAppConfirmation(appointment, profile.name, profile.whatsappPhoneNumberId, profile.whatsappToken).catch(err => {
+        console.error("Erro no envio do WhatsApp do novo agendamento:", err);
+      });
+    }
+
     return appointment;
   };
 
   const updateAppointmentStatus = async (id: string, status: 'pending' | 'confirmed' | 'cancelled') => {
+    let originalApp: Appointment | undefined;
+
     setAppointments(prev => prev.map(app => {
       if (app.id === id) {
+        originalApp = app;
         if (app.status !== status) {
           const newNotif: AppNotification = {
             id: `not_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
@@ -1143,16 +1204,26 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     addAuditLog('Alterar Status Agendamento', `Agendamento ${id}`, `Status alterado para '${status}'`);
 
     const targetUid = profile.uid || 'prof_essence_123';
-    if (isFirebaseConnected) {
-      const appPath = `users/${targetUid}/appointments/${id}`;
-      try {
-        const original = appointments.find(a => a.id === id);
-        if (original) {
-          const sanitized = sanitizeAppointment({ ...original, status });
+    const original = originalApp || appointments.find(a => a.id === id);
+
+    if (original) {
+      const updatedApp = { ...original, status };
+
+      if (isFirebaseConnected) {
+        const appPath = `users/${targetUid}/appointments/${id}`;
+        try {
+          const sanitized = sanitizeAppointment(updatedApp);
           await setDoc(doc(db, 'users', targetUid, 'appointments', id), sanitized, { merge: true });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.WRITE, appPath);
         }
-      } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, appPath);
+      }
+
+      // If the status is changing to confirmed, send WhatsApp message
+      if (status === 'confirmed' && original.status !== 'confirmed') {
+        sendWhatsAppConfirmation(updatedApp, profile.name, profile.whatsappPhoneNumberId, profile.whatsappToken).catch(err => {
+          console.error("Erro no envio do WhatsApp ao alterar status:", err);
+        });
       }
     }
   };
@@ -1243,8 +1314,34 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (isFirebaseConnected) {
       const targetUid = profile.uid || 'prof_essence_123';
       try {
+        const phoneClean = phone.replace(/\D/g, '');
+        const formatOld = (digits: string) => {
+          if (digits.length === 11) {
+            return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+          } else if (digits.length === 10) {
+            return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+          }
+          return digits;
+        };
+        const formatNew = (digits: string) => {
+          if (digits.length === 11) {
+            return `(${digits.slice(0, 2)}) ${digits.slice(2, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
+          } else if (digits.length === 10) {
+            return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+          }
+          return digits;
+        };
+        const possiblePhones = Array.from(new Set([
+          phone, 
+          phoneClean, 
+          formatOld(phoneClean), 
+          formatNew(phoneClean)
+        ])).filter(Boolean);
+
+        if (possiblePhones.length === 0) return;
+
         const appointmentsRef = collection(db, 'users', targetUid, 'appointments');
-        const q = query(appointmentsRef, where("customerPhone", "==", phone));
+        const q = query(appointmentsRef, where("customerPhone", "in", possiblePhones));
         const qSnap = await getDocs(q);
         const list: Appointment[] = [];
         qSnap.forEach((doc) => {
@@ -1262,7 +1359,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 temp.push(newApp);
               }
             });
-            return temp.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+            return temp.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
           });
         }
       } catch (err) {

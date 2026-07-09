@@ -16,7 +16,7 @@
   --app-slate-50: #f8fafc;
 }
 
-/* Light mode definitions remapping standard slate colors dynamically */
+/* Light mode definitions remapping standard slate and neutral colors dynamically */
 .light {
   --app-slate-950: #f8fafc; /* Page Background (Slate 50) */
   --app-slate-900: #ffffff; /* Card Backgrounds (White) */
@@ -47,10 +47,27 @@
   --color-slate-600: var(--app-slate-600);
   --color-slate-500: var(--app-slate-500);
   --color-slate-400: var(--app-slate-400);
+  --color-slate-350: var(--app-slate-300);
+  --color-slate-355: var(--app-slate-300);
   --color-slate-300: var(--app-slate-300);
   --color-slate-200: var(--app-slate-200);
   --color-slate-100: var(--app-slate-100);
   --color-slate-50: var(--app-slate-50);
+
+  /* Bind standard Neutral colors to adapt dynamically alongside Slate variables */
+  --color-neutral-950: var(--app-slate-950);
+  --color-neutral-900: var(--app-slate-900);
+  --color-neutral-850: var(--app-slate-850);
+  --color-neutral-800: var(--app-slate-800);
+  --color-neutral-700: var(--app-slate-700);
+  --color-neutral-600: var(--app-slate-600);
+  --color-neutral-500: var(--app-slate-500);
+  --color-neutral-400: var(--app-slate-400);
+  --color-neutral-350: var(--app-slate-300);
+  --color-neutral-300: var(--app-slate-300);
+  --color-neutral-200: var(--app-slate-200);
+  --color-neutral-100: var(--app-slate-100);
+  --color-neutral-50: var(--app-slate-50);
   
   @keyframes fade-in {
     from { opacity: 0; transform: translateY(6px); }
@@ -80,19 +97,98 @@
   scrollbar-width: none;  /* Firefox */
 }
 
-/* Custom fine-tuning for light mode rendering high-contrast texts */
-.light .text-white:not(
-  button *, 
-  [class*="bg-indigo-"] *, 
-  [class*="bg-emerald-"] *, 
-  [class*="bg-red-"] *, 
-  [class*="bg-violet-"] *,
-  .bg-indigo-600,
-  .bg-emerald-600,
-  .bg-red-600,
-  .bg-indigo-505
-) {
-  color: #0f172a !important; /* dark slate for headings that are styled as text-white in dark mode */
+/* Custom fine-tuning for light mode rendering high-contrast elements */
+.light .text-white {
+  color: #0f172a !important; /* dark slate for texts styled as text-white in dark mode */
+}
+
+/* Ensure background color buttons, badges and alerts continue to have pristine white text */
+.light .bg-primary,
+.light .bg-indigo-600,
+.light .bg-emerald-600,
+.light .bg-red-600,
+.light .bg-indigo-500,
+.light .bg-indigo-700,
+.light .bg-emerald-500,
+.light .bg-emerald-700,
+.light .bg-red-500,
+.light .bg-red-700,
+.light .bg-primary *,
+.light .bg-indigo-600 *,
+.light .bg-emerald-600 *,
+.light .bg-red-600 *,
+.light .bg-indigo-500 *,
+.light .bg-indigo-700 *,
+.light .bg-emerald-500 *,
+.light .bg-emerald-700 *,
+.light .bg-red-500 *,
+.light .bg-red-700 * {
+  color: #ffffff !important;
+}
+
+/* Ensure secondary buttons and slate-based buttons are fully legible with dark-slate text & icons */
+.light button.bg-slate-950,
+.light button.bg-slate-900,
+.light button.bg-slate-850,
+.light button.bg-neutral-950,
+.light button.bg-neutral-900,
+.light button.bg-neutral-850,
+.light [id="unified-auth-canvas"] button[type="button"]:not([class*="bg-indigo"]):not([class*="bg-primary"]):not([class*="bg-emerald"]):not([class*="bg-red"]),
+.light [id="unified-auth-canvas"] button[type="submit"]:not([class*="bg-indigo"]):not([class*="bg-primary"]):not([class*="bg-emerald"]):not([class*="bg-red"]) {
+  color: #0f172a !important;
+}
+
+.light button.bg-slate-950 *,
+.light button.bg-slate-900 *,
+.light button.bg-slate-850 *,
+.light button.bg-neutral-950 *,
+.light button.bg-neutral-900 *,
+.light button.bg-neutral-850 *,
+.light [id="unified-auth-canvas"] button[type="button"]:not([class*="bg-indigo"]):not([class*="bg-primary"]):not([class*="bg-emerald"]):not([class*="bg-red"]) *,
+.light [id="unified-auth-canvas"] button[type="submit"]:not([class*="bg-indigo"]):not([class*="bg-primary"]):not([class*="bg-emerald"]):not([class*="bg-red"]) * {
+  color: #0f172a !important;
+}
+
+/* Forces SVG icons inside those secondary, neutral, or social buttons to render as dark-slate in light mode */
+.light button.bg-slate-950 svg,
+.light button.bg-slate-900 svg,
+.light button.bg-slate-850 svg,
+.light button.bg-neutral-950 svg,
+.light button.bg-neutral-900 svg,
+.light button.bg-neutral-850 svg,
+.light [id="unified-auth-canvas"] button[type="button"]:not([class*="bg-indigo"]):not([class*="bg-primary"]):not([class*="bg-emerald"]):not([class*="bg-red"]) svg,
+.light [id="unified-auth-canvas"] button[type="submit"]:not([class*="bg-indigo"]):not([class*="bg-primary"]):not([class*="bg-emerald"]):not([class*="bg-red"]) svg {
+  color: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+.light button.bg-slate-950 svg.fill-current,
+.light button.bg-slate-900 svg.fill-current,
+.light [id="unified-auth-canvas"] button[type="button"]:not([class*="bg-indigo"]):not([class*="bg-primary"]):not([class*="bg-emerald"]):not([class*="bg-red"]) svg.fill-current {
+  fill: #0f172a !important;
+  color: #0f172a !important;
+}
+
+/* Exclude colored/primary buttons so they preserve beautiful white text and SVG states */
+.light button.bg-indigo-600 *,
+.light button.bg-indigo-500 *,
+.light button.bg-emerald-600 *,
+.light button.bg-emerald-500 *,
+.light button.bg-red-600 *,
+.light button.bg-red-500 *,
+.light button.bg-primary * {
+  color: #ffffff !important;
+}
+
+.light button.bg-indigo-600 svg,
+.light button.bg-indigo-500 svg,
+.light button.bg-emerald-600 svg,
+.light button.bg-emerald-500 svg,
+.light button.bg-red-600 svg,
+.light button.bg-red-500 svg,
+.light button.bg-primary svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 .light .text-neutral-200, .light .text-slate-200 {
@@ -100,11 +196,569 @@
 }
 
 .light input, .light select, .light textarea {
-  color: #0f172a !important;
+  background-color: #ffffff !important;
+  color: #000000 !important; /* Pitch black text for absolute readability */
+  border-color: #94a3b8 !important; /* Darker border for higher outline separation */
+  font-weight: 500 !important;
 }
 
 .light input::placeholder, .light textarea::placeholder {
-  color: #94a3b8 !important;
+  color: #475569 !important; /* Extremely readable medium grey placeholder text */
+  opacity: 1 !important;
+}
+
+/* Specific overrides for unified auth canvas inputs to ensure they don't inherit dark backgrounds */
+.light [id="unified-auth-canvas"] input,
+.light [id="unified-auth-canvas"] select,
+.light [id="unified-auth-canvas"] textarea {
+  background-color: #ffffff !important;
+  color: #000000 !important; /* Solid black text inside auth inputs */
+  border-color: #94a3b8 !important; /* Rich contrast borders */
+  font-weight: 500 !important;
+}
+
+.light [id="unified-auth-canvas"] input:focus,
+.light [id="unified-auth-canvas"] select:focus {
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15) !important;
+}
+
+/* Focused elements exactly targeted */
+.light input {
+  color: #000000 !important;
+}
+
+/* High contrast icons inside input elements */
+.light [id="unified-auth-canvas"] form svg,
+.light [id="unified-auth-canvas"] .relative svg {
+  color: #1e293b !important; /* Deep dark slate color for input icons */
+}
+
+/* --- LIGHT MODE REFINEMENTS FOR #UNIFIED-AUTH-CANVAS BRAND HEADER & LABELS --- */
+
+/* High contrast headings (h1, h2, h3, h4) inside the authentication canvas */
+.light [id="unified-auth-canvas"] h1,
+.light [id="unified-auth-canvas"] h2,
+.light [id="unified-auth-canvas"] h3,
+.light [id="unified-auth-canvas"] h4 {
+  color: #0f172a !important;
+}
+
+/* Specific text-white overrides inside the canvas to guarantee dark slate/charcoal text */
+.light [id="unified-auth-canvas"] .text-white:not([class*="bg-indigo-"] *):not([class*="bg-emerald-"] *):not([class*="bg-red-"] *):not([class*="bg-primary"] *) {
+  color: #0f172a !important;
+}
+
+/* High contrast secondary and status labels (e.g. 'Painel Profissional' text) */
+.light [id="unified-auth-canvas"] .text-slate-500,
+.light [id="unified-auth-canvas"] .text-neutral-500,
+.light [id="unified-auth-canvas"] .text-slate-400,
+.light [id="unified-auth-canvas"] .text-neutral-400 {
+  color: #475569 !important;
+}
+
+/* Clean, visible lines and dividers under light mode card backgrounds */
+.light [id="unified-auth-canvas"] .border-slate-800,
+.light [id="unified-auth-canvas"] .border-slate-850,
+.light [id="unified-auth-canvas"] .border-slate-900,
+.light [id="unified-auth-canvas"] .border-neutral-800,
+.light [id="unified-auth-canvas"] .border-neutral-850 {
+  border-color: #cbd5e1 !important;
+}
+
+/* --- LIGHT MODE REFINEMENTS FOR THE FOOTER AREA --- */
+.light footer {
+  background-color: #f1f5f9 !important; /* solid, clean light slate footer background for contrast */
+  border-color: #cbd5e1 !important;
+}
+
+.light footer,
+.light footer * {
+  color: #000000 !important; /* pitch black text for absolute maximum readability */
+  opacity: 1 !important;
+}
+
+.light footer div,
+.light footer span,
+.light footer .text-slate-500,
+.light footer .text-slate-600 {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Explicit targeted selectors for the focused footer elements in light mode */
+.light div#root:nth-of-type(1) > div#agenda-facil-root:nth-of-type(1) > footer:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1),
+.light div#root:nth-of-type(1) > div#agenda-facil-root:nth-of-type(1) > footer:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(3),
+.light div#root:nth-of-type(1) > div#agenda-facil-root:nth-of-type(1) > footer:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1) {
+  color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 700 !important; /* Bold font for maximum readability in light mode */
+}
+
+/* --- LIGHT MODE REFINEMENTS FOR THE HEADER AREA --- */
+.light header {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px) !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Make Logo Text perfectly visible */
+.light header span.text-white {
+  color: #0f172a !important;
+}
+
+/* Maintain high-contrast brand box styling */
+.light header div.bg-indigo-600 {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+.light header div.bg-indigo-600 * {
+  color: #ffffff !important;
+}
+
+/* Header Text elements */
+.light header span,
+.light header .text-white {
+  color: #0f172a !important;
+}
+
+.light header p,
+.light header .text-slate-500 {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+
+/* Small badge "v2.4.0" */
+.light header .bg-slate-800 {
+  background-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+/* Switcher container and action buttons */
+.light header div.bg-slate-950 {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light header div.bg-slate-950 button {
+  color: #475569 !important;
+}
+
+.light header div.bg-slate-950 button.bg-indigo-600 {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+.light header div.bg-slate-950 button.bg-indigo-600 * {
+  color: #ffffff !important;
+}
+
+.light header .text-slate-300 {
+  color: #334155 !important;
+}
+
+/* Dropdown theme widget button */
+.light header button.bg-slate-950 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+.light header button.bg-slate-950:hover {
+  background-color: #f8fafc !important;
+}
+
+/* --- COMPREHENSIVE LIGHT MODE COLOR REFINEMENTS FOR MODERN READABILITY --- */
+
+/* 1. General Light Mode Canvas adjustments for App Root */
+.light #agenda-facil-root {
+  background-color: #f8fafc !important;
+  color: #0d1527 !important;
+}
+
+/* 2. Main titles and headers */
+.light h3:not([class*="bg-indigo-"] *):not([class*="bg-primary"] *):not([class*="bg-emerald-"] *):not([class*="bg-red-"] *), 
+.light h3 span:not([class*="bg-indigo-"] *):not([class*="bg-primary"] *):not([class*="bg-emerald-"] *):not([class*="bg-red-"] *),
+.light h4:not([class*="bg-indigo-"] *):not([class*="bg-primary"] *):not([class*="bg-emerald-"] *):not([class*="bg-red-"] *),
+.light .text-lg.font-bold:not([class*="bg-indigo-"] *):not([class*="bg-primary"] *):not([class*="bg-emerald-"] *):not([class*="bg-red-"] *) {
+  color: #0f172a !important;
+}
+
+.light h3 span:not([class*="bg-indigo-"] *):not([class*="bg-primary"] *):not([class*="bg-emerald-"] *):not([class*="bg-red-"] *) {
+  color: #475569 !important;
+}
+
+.light p.text-xs,
+.light p.text-slate-400,
+.light p.text-slate-500 {
+  color: #334155 !important;
+  opacity: 1 !important;
+}
+
+/* Failproof Utility Class Color Contrast Overrides for Light Mode */
+.light .text-slate-100, .light .text-neutral-100 {
+  color: #0d1527 !important;
+}
+.light .text-slate-200, .light .text-neutral-200 {
+  color: #0f172a !important;
+}
+.light .text-slate-300, .light .text-neutral-300 {
+  color: #1e293b !important;
+}
+.light .text-slate-400, .light .text-neutral-400 {
+  color: #334155 !important;
+}
+.light .text-slate-500, .light .text-neutral-500 {
+  color: #475569 !important;
+}
+
+/* Ensure any text-white inside non-primary components becomes dark slate in light mode */
+.light .text-white:not([class*="bg-indigo-"] *):not([class*="bg-emerald-"] *):not([class*="bg-red-"] *):not(.bg-primary *):not(.bg-indigo-600 *):not(.bg-indigo-500 *):not(.bg-indigo-700 *):not(.bg-emerald-600 *):not(.bg-emerald-500 *):not(.bg-red-650 *):not(.bg-red-600 *):not(.bg-red-500 *):not([class*="bg-indigo-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]):not(.bg-indigo-600):not(.bg-indigo-500):not(.bg-emerald-600):not(.bg-emerald-500):not(.bg-red-600):not(.bg-red-500):not(.bg-primary) {
+  color: #0f172a !important;
+}
+
+/* Crucial high-contrast support for status and active items in light mode to replace low contrast glowing colors */
+.light .text-indigo-400,
+.light .text-indigo-500,
+.light .text-indigo-300 {
+  color: #4f46e5 !important;
+}
+.light .text-indigo-400 svg,
+.light .text-indigo-500 svg,
+.light .text-indigo-300 svg {
+  color: #4f46e5 !important;
+  stroke: #4f46e5 !important;
+}
+
+.light .text-amber-400,
+.light .text-amber-500 {
+  color: #c2410c !important; /* Golden amber-brown for high readability */
+}
+.light .text-amber-400 svg,
+.light .text-amber-500 svg {
+  color: #c2410c !important;
+  stroke: #c2410c !important;
+}
+
+.light .text-emerald-400,
+.light .text-emerald-500 {
+  color: #047857 !important; /* Rich emerald mint green */
+}
+.light .text-emerald-400 svg,
+.light .text-emerald-500 svg {
+  color: #047857 !important;
+  stroke: #047857 !important;
+}
+
+/* 3. Aside Sidebar Navigation panel elements */
+.light aside {
+  background-color: transparent !important;
+}
+
+/* User identity sidebar widget card */
+.light aside div.bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light aside div.bg-slate-900 h4 {
+  color: #0f172a !important;
+}
+
+.light aside div.bg-slate-900 p {
+  color: #475569 !important;
+}
+
+/* Sidebar navigation buttons */
+.light aside nav button {
+  color: #1e293b !important;
+}
+
+.light aside nav button:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Active navigation button in Light Mode */
+.light aside nav button.bg-indigo-600\/10,
+.light aside nav button.text-indigo-400,
+.light aside nav button[class*="bg-indigo-"] {
+  background-color: rgba(79, 70, 229, 0.08) !important;
+  color: #4f46e5 !important;
+  border-color: rgba(79, 70, 229, 0.25) !important;
+  font-weight: 700 !important;
+}
+
+.light aside nav button.bg-indigo-600\/10 svg,
+.light aside nav button.text-indigo-400 svg,
+.light aside nav button[class*="bg-indigo-"] svg {
+  color: #4f46e5 !important;
+  stroke: #4f46e5 !important;
+}
+
+.light aside nav button:not([class*="bg-indigo"]) svg {
+  color: #334155 !important;
+  stroke: #334155 !important;
+}
+
+/* "Sair do Painel" button in sidebar */
+.light aside button.bg-slate-950,
+.light aside button.bg-slate-950 * {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #ef4444 !important; /* Elegant clear exit red */
+}
+
+/* Testar Link badge inside left widget */
+.light .border-slate-800 button,
+.light .border-slate-800 a,
+.light .bg-indigo-600 {
+  color: #ffffff !important;
+}
+
+/* 4. Stats Metrics Row Cards */
+.light .grid-cols-1 > div.bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+}
+
+/* Titles "Agendamentos de Hoje", "Aguardando Confirmação", "Total de Clientes" */
+.light .grid-cols-1 > div.bg-slate-900 span.text-slate-400 {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+/* Large numeric display fields */
+.light .grid-cols-1 > div.bg-slate-900 span.text-3xl {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+/* Footer subtitles inside metrics */
+.light .grid-cols-1 > div.bg-slate-900 span.text-\[10px\] {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+.light .grid-cols-1 > div.bg-slate-900 span.text-indigo-400 {
+  color: #4f46e5 !important;
+  font-weight: 600 !important;
+}
+
+.light .grid-cols-1 > div.bg-slate-900 span.text-amber-500 {
+  color: #d97706 !important;
+}
+
+/* Icons box wrappers inside metrics cards */
+.light .grid-cols-1 > div.bg-slate-900 div.bg-indigo-600\/10 {
+  background-color: rgba(79, 70, 229, 0.08) !important;
+  border-color: rgba(79, 70, 229, 0.15) !important;
+}
+.light .grid-cols-1 > div.bg-slate-900 div.bg-indigo-600\/10 svg {
+  color: #4f46e5 !important;
+}
+
+.light .grid-cols-1 > div.bg-slate-900 div.bg-amber-500\/10 {
+  background-color: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.15) !important;
+}
+.light .grid-cols-1 > div.bg-slate-900 div.bg-amber-500\/10 svg {
+  color: #d97706 !important;
+}
+
+.light .grid-cols-1 > div.bg-slate-900 div.bg-slate-850 {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+.light .grid-cols-1 > div.bg-slate-900 div.bg-slate-850 svg {
+  color: #475569 !important;
+}
+
+/* 5. Center Appointment Ledger Table Panel */
+.light .lg-col-span-8,
+.light .lg\:col-span-8 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Quick Search bar filter wrapper background */
+.light .bg-slate-950 {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light .bg-slate-950 input,
+.light .bg-slate-950 select {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.light .bg-slate-950 span.text-slate-500 {
+  color: #334155 !important;
+}
+
+.light .bg-slate-950 svg {
+  color: #475569 !important;
+}
+
+/* 6. List Items - Appointment cards */
+.light .flex-1 .space-y-4 > div {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light .flex-1 .space-y-4 > div:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Time display field */
+.light .flex-1 .space-y-4 > div p.text-base.font-mono {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Duration */
+.light .flex-1 .space-y-4 > div p.text-\[10px\].text-slate-500 {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+/* Customer name */
+.light .flex-1 .space-y-4 > div p.text-white.font-semibold {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Service description */
+.light .flex-1 .space-y-4 > div p.text-xs.text-slate-400 {
+  color: #334155 !important;
+}
+
+/* Cancel button */
+.light .flex-1 .space-y-4 > div button.bg-slate-800 {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #e11d48 !important; /* visible bright red delete color */
+}
+
+.light .flex-1 .space-y-4 > div button.bg-slate-800:hover {
+  background-color: #ffe4e6 !important;
+}
+
+/* Empty listings */
+.light .text-center.py-12.bg-slate-950 {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+.light .text-center.py-12.bg-slate-950 p {
+  color: #64748b !important;
+}
+
+/* 7. Right Side Notifications Container Panel */
+.light .lg-col-span-4,
+.light .lg\:col-span-4 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+.light .lg-col-span-4 h3.text-slate-500,
+.light .lg\:col-span-4 h3.text-slate-500 {
+  color: #334155 !important;
+  font-weight: 700 !important;
+}
+
+/* Feed notifications rows */
+.light .lg-col-span-4 .space-y-4 > div,
+.light .lg\:col-span-4 .space-y-4 > div {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 10px !important;
+  border-radius: 12px;
+}
+
+.light .lg-col-span-4 .space-y-4 > div:hover,
+.light .lg\:col-span-4 .space-y-4 > div:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Log Item Icons */
+.light .lg-col-span-4 .space-y-4 > div div.bg-emerald-500\/10,
+.light .lg\:col-span-4 .space-y-4 > div div.bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+  color: #059669 !important;
+}
+
+.light .lg-col-span-4 .space-y-4 > div div.bg-indigo-500\/10,
+.light .lg\:col-span-4 .space-y-4 > div div.bg-indigo-500\/10 {
+  background-color: rgba(79, 70, 229, 0.08) !important;
+  color: #4f46e5 !important;
+}
+
+.light .lg-col-span-4 .space-y-4 > div div.bg-emerald-500\/10 svg,
+.light .lg\:col-span-4 .space-y-4 > div div.bg-emerald-500\/10 svg {
+  color: #059669 !important;
+}
+
+.light .lg-col-span-4 .space-y-4 > div p.text-slate-300,
+.light .lg\:col-span-4 .space-y-4 > div p.text-slate-300 {
+  color: #0f172a !important; /* Pitch black text for notifications */
+  font-weight: 600 !important;
+}
+
+.light .lg-col-span-4 .space-y-4 > div p.text-slate-400,
+.light .lg\:col-span-4 .space-y-4 > div p.text-slate-400 {
+  color: #334155 !important; /* Highly legible grey for details */
+}
+
+.light .lg-col-span-4 .space-y-4 > div p.text-slate-500,
+.light .lg\:col-span-4 .space-y-4 > div p.text-slate-500 {
+  color: #64748b !important;
+}
+
+/* 8. Audit Logs View */
+.light .bg-slate-900\/30 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light .table-container,
+.light table {
+  color: #0f172a !important;
+}
+
+.light th {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
+}
+
+.light td {
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Complete transparency fix for modals in light mode */
+.light .fixed.inset-0.bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.light .fixed.inset-0 .bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light .fixed.inset-0 .bg-slate-900 h3 {
+  color: #0f172a !important;
+}
+
+.light .fixed.inset-0 .bg-slate-900 label {
+  color: #475569 !important;
+  font-weight: bold !important;
 }
 
 
