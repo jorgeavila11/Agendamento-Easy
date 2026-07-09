@@ -74,43 +74,102 @@ function AppContent() {
     <div id="agenda-facil-root" className="min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col selection:bg-primary selection:text-white">
       {/* Top Professional Navigation Header */}
       <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          {/* Logo Brand Brand */}
-          <div className="flex-1 flex justify-start items-center gap-2.5">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md">
-              AF
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-white tracking-tight text-md">Agenda Fácil</span>
-                <span className="text-[10px] font-bold bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-full">v2.4.0</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-0 min-h-18 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
+          {/* Logo and Mobile controls Row */}
+          <div className="flex items-center justify-between w-full md:w-auto md:flex-1">
+            {/* Logo Brand Brand */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md shrink-0">
+                AF
               </div>
-              <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Sistema de Agendamentos</p>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-white tracking-tight text-md">Agenda Fácil</span>
+                  <span className="text-[10px] font-bold bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-full">v2.4.0</span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Sistema de Agendamentos</p>
+              </div>
+            </div>
+
+            {/* Mobile Theme Selector to conserve header space */}
+            <div className="flex md:hidden items-center gap-2">
+              {isProfessionalLoggedIn && viewMode === 'admin' && (
+                <div className="relative">
+                  <button
+                    onClick={() => setThemeOpen(!themeOpen)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all select-none outline-none focus:ring-1 focus:ring-indigo-500/50"
+                  >
+                    {theme === 'light' && <Sun className="w-3.5 h-3.5 text-indigo-400" />}
+                    {theme === 'dark' && <Moon className="w-3.5 h-3.5 text-indigo-400" />}
+                    {theme === 'system' && <Monitor className="w-3.5 h-3.5 text-indigo-400" />}
+                    {theme !== 'light' && theme !== 'dark' && theme !== 'system' && <Monitor className="w-3.5 h-3.5 text-indigo-400" />}
+                    <ChevronDown className="w-3 h-3 text-slate-500" />
+                  </button>
+                  
+                  {themeOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setThemeOpen(false)} />
+                      <div className="absolute right-0 mt-1.5 w-36 bg-slate-950 border border-slate-800 rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 animate-fade-in text-slate-300">
+                        <button
+                          onClick={() => {
+                            setTheme('light');
+                            setThemeOpen(false);
+                          }}
+                          className={`flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium cursor-pointer transition-colors outline-none ${theme === 'light' ? 'bg-indigo-600/15 text-indigo-400 font-bold' : 'hover:text-white hover:bg-slate-900'}`}
+                        >
+                          <Sun className="w-3.5 h-3.5" />
+                          <span>Claro</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setTheme('dark');
+                            setThemeOpen(false);
+                          }}
+                          className={`flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium cursor-pointer transition-colors outline-none ${theme === 'dark' ? 'bg-indigo-600/15 text-indigo-400 font-bold' : 'hover:text-white hover:bg-slate-900'}`}
+                        >
+                          <Moon className="w-3.5 h-3.5" />
+                          <span>Escuro</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setTheme('system');
+                            setThemeOpen(false);
+                          }}
+                          className={`flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-medium cursor-pointer transition-colors outline-none ${theme === 'system' ? 'bg-indigo-600/15 text-indigo-400 font-bold' : 'hover:text-white hover:bg-slate-900'}`}
+                        >
+                          <Monitor className="w-3.5 h-3.5" />
+                          <span>Sistema</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Center Mode Switcher (Interactive Sandbox Experience) */}
           {isProfessionalLoggedIn && (
-            <div className="shrink-0 p-1 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-1">
+            <div className="shrink-0 p-1 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-1 w-full md:w-auto justify-center">
               <button
                 onClick={() => setViewMode('admin')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 outline-none cursor-pointer ${viewMode === 'admin' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 md:flex-initial px-3 sm:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 outline-none cursor-pointer ${viewMode === 'admin' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
               >
-                <Settings className="w-3.5 h-3.5" />
+                <Settings className="w-3.5 h-3.5 shrink-0" />
                 Painel Profissional
               </button>
               <button
                 onClick={() => setViewMode('public')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 outline-none cursor-pointer ${viewMode === 'public' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 md:flex-initial px-3 sm:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 outline-none cursor-pointer ${viewMode === 'public' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
               >
-                <Eye className="w-3.5 h-3.5" />
+                <Eye className="w-3.5 h-3.5 shrink-0" />
                 Ver Link Público
               </button>
             </div>
           )}
 
-          {/* Right Status indicators */}
-          <div className="flex-1 flex justify-end items-center gap-4">
+          {/* Right Status indicators - Desktop version */}
+          <div className="hidden md:flex flex-1 justify-end items-center gap-4">
             {/* Elegant Dropdown Theme Switcher Widget */}
             {isProfessionalLoggedIn && viewMode === 'admin' && (
               <div className="relative">
@@ -166,7 +225,7 @@ function AppContent() {
             )}
 
             {/* Quick guide helper */}
-            <div className="text-slate-500 hover:text-slate-300 transition-colors hidden sm:block">
+            <div className="text-slate-500 hover:text-slate-300 transition-colors">
               <HelpCircle className="w-5 h-5 pointer-events-none" />
             </div>
           </div>

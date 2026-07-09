@@ -743,8 +743,10 @@
 }
 
 /* Complete transparency fix for modals in light mode */
-.light .fixed.inset-0.bg-black\/60 {
-  background-color: rgba(0, 0, 0, 0.45) !important;
+.light .fixed.inset-0.bg-black\/60,
+.light .fixed.inset-0.bg-black\/75 {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
 }
 
 .light .fixed.inset-0 .bg-slate-900 {
@@ -752,13 +754,30 @@
   border-color: #cbd5e1 !important;
 }
 
-.light .fixed.inset-0 .bg-slate-900 h3 {
+.light .fixed.inset-0 .bg-slate-900 h3,
+.light .fixed.inset-0 .bg-slate-900 h4 {
   color: #0f172a !important;
 }
 
 .light .fixed.inset-0 .bg-slate-900 label {
   color: #475569 !important;
   font-weight: bold !important;
+}
+
+/* Ensure secondary buttons and cancel buttons inside portals look solid and perfectly visible in light mode */
+.light button.border-slate-700,
+.light .fixed.inset-0 button.border-slate-700,
+.light .fixed.inset-0 button.bg-slate-900:not(.bg-indigo-600) {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+.light button.border-slate-700:hover,
+.light .fixed.inset-0 button.border-slate-700:hover,
+.light .fixed.inset-0 button.bg-slate-900:not(.bg-indigo-600):hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
 }
 
 

@@ -374,41 +374,44 @@ export default function Dashboard() {
                   <div 
                     key={app.id} 
                     onClick={() => setDetailAppointment(app)}
-                    className="flex gap-4 p-4 bg-slate-800/30 rounded-xl border border-slate-700/50 hover:bg-slate-800/50 hover:border-indigo-500/30 transition-all items-center cursor-pointer group"
+                    className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-4 bg-slate-800/30 rounded-xl border border-slate-700/50 hover:bg-slate-800/50 hover:border-indigo-500/30 transition-all items-stretch sm:items-center cursor-pointer group"
                   >
-                    {isPending && (
-                      <div 
-                        className="shrink-0 flex items-center pr-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded bg-slate-900 border-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-950 cursor-pointer"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedAppIds(prev => [...prev, app.id]);
-                            } else {
-                              setSelectedAppIds(prev => prev.filter(id => id !== app.id));
-                            }
-                          }}
-                        />
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                      {isPending && (
+                        <div 
+                          className="shrink-0 flex items-center pr-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 rounded bg-slate-900 border-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-950 cursor-pointer"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedAppIds(prev => [...prev, app.id]);
+                              } else {
+                                setSelectedAppIds(prev => prev.filter(id => id !== app.id));
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="text-center min-w-[55px] shrink-0">
+                        <p className="text-base font-bold text-white font-mono">{app.time}</p>
+                        <p className="text-[10px] text-slate-500 uppercase">{app.duration} min</p>
                       </div>
-                    )}
-                    <div className="text-center min-w-[55px]">
-                      <p className="text-base font-bold text-white font-mono">{app.time}</p>
-                      <p className="text-[10px] text-slate-500 uppercase">{app.duration} min</p>
+                      <div className={`w-1 self-stretch rounded-full shrink-0 ${
+                        app.status === 'confirmed' ? 'bg-indigo-500' :
+                        app.status === 'pending' ? 'bg-amber-500' : 'bg-slate-600'
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold truncate group-hover:text-indigo-300 transition-colors">{app.customerName}</p>
+                        <p className="text-xs text-slate-400 mt-0.5 truncate">{app.serviceName}</p>
+                      </div>
                     </div>
-                    <div className={`w-1 self-stretch rounded-full shrink-0 ${
-                      app.status === 'confirmed' ? 'bg-indigo-500' :
-                      app.status === 'pending' ? 'bg-amber-500' : 'bg-slate-600'
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold truncate group-hover:text-indigo-300 transition-colors">{app.customerName}</p>
-                      <p className="text-xs text-slate-400 mt-0.5 truncate">{app.serviceName}</p>
-                    </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                      <div className="hidden sm:block">
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 border-t border-slate-800/40 pt-2.5 sm:pt-0 sm:border-t-0">
+                      <div>
                         {app.status === 'confirmed' && (
                           <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] rounded border border-emerald-500/20 uppercase font-bold">Confirmado</span>
                         )}
@@ -488,8 +491,8 @@ export default function Dashboard() {
       {/* Walk-in custom modal creation */}
       {isModalOpen && createPortal(
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col animate-fade-in text-slate-200">
-            <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col animate-fade-in text-slate-200">
+            <div className="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-950">
               <h4 className="text-md font-bold text-white font-display">Agendamento Manual Walk-in</h4>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -510,7 +513,7 @@ export default function Dashboard() {
                 <label className="text-xs text-slate-400 block font-semibold">Nome do Cliente</label>
                 <input 
                   type="text" required
-                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all"
+                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-700 outline-none focus:border-indigo-500 transition-all"
                   value={clientName} onChange={(e) => setClientName(e.target.value)}
                 />
               </div>
@@ -519,90 +522,90 @@ export default function Dashboard() {
                 <div className="space-y-1">
                   <label className="text-xs text-slate-400 block font-semibold">Telefone</label>
                   <input 
-                  type="text" required
-                  placeholder="Ex: (88) 9 9761-4430"
-                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all font-sans"
-                  value={clientPhone} onChange={(e) => setClientPhone(maskBrazilianPhone(e.target.value))}
-                />
+                    type="text" required
+                    placeholder="Ex: (88) 9 9761-4430"
+                    className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-700 outline-none focus:border-indigo-500 transition-all font-sans"
+                    value={clientPhone} onChange={(e) => setClientPhone(maskBrazilianPhone(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-400 block font-semibold">Email (Opcional)</label>
+                  <input 
+                    type="email"
+                    placeholder="email@cliente.com"
+                    className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-700 outline-none focus:border-indigo-500 transition-all"
+                    value={clientEmail} onChange={(e) => setClientEmail(e.target.value)}
+                  />
+                </div>
               </div>
+
               <div className="space-y-1">
-                <label className="text-xs text-slate-400 block font-semibold">Email (Opcional)</label>
-                <input 
-                  type="email"
-                  placeholder="email@cliente.com"
-                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all"
-                  value={clientEmail} onChange={(e) => setClientEmail(e.target.value)}
-                />
+                <label className="text-xs text-slate-400 block font-semibold">Escolha o Serviço</label>
+                <select 
+                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-700 outline-none cursor-pointer focus:border-indigo-500 transition-all"
+                  value={selectedServiceId}
+                  onChange={(e) => setSelectedServiceId(e.target.value)}
+                >
+                  {services.map(srv => (
+                    <option key={srv.id} value={srv.id} className="bg-slate-900 text-white">{srv.name} - R$ {srv.price} ({srv.duration} min)</option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            <div className="space-y-1">
-              <label className="text-xs text-slate-400 block font-semibold">Escolha o Serviço</label>
-              <select 
-                className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-800 outline-none cursor-pointer focus:border-indigo-500 transition-all"
-                value={selectedServiceId}
-                onChange={(e) => setSelectedServiceId(e.target.value)}
-              >
-                {services.map(srv => (
-                  <option key={srv.id} value={srv.id} className="bg-slate-900 text-white">{srv.name} - R$ {srv.price} ({srv.duration} min)</option>
-                ))}
-              </select>
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-400 block font-semibold">Data</label>
+                  <input 
+                    type="date" required
+                    className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-700 outline-none focus:border-indigo-500 transition-all"
+                    value={bookingDate} onChange={(e) => setBookingDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-400 block font-semibold">Horário</label>
+                  <input 
+                    type="time" required
+                    className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-700 outline-none focus:border-indigo-500 transition-all"
+                    value={bookingTime} onChange={(e) => setBookingTime(e.target.value)}
+                  />
+                </div>
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs text-slate-400 block font-semibold">Data</label>
-                <input 
-                  type="date" required
-                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all"
-                  value={bookingDate} onChange={(e) => setBookingDate(e.target.value)}
+                <label className="text-xs text-slate-400 block font-semibold">Anotações Internas (Opcional)</label>
+                <textarea 
+                  rows={2}
+                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-700 outline-none focus:border-indigo-500 transition-all resize-none"
+                  value={bookingNotes} onChange={(e) => setBookingNotes(e.target.value)}
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs text-slate-400 block font-semibold">Horário</label>
-                <input 
-                  type="time" required
-                  className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all"
-                  value={bookingTime} onChange={(e) => setBookingTime(e.target.value)}
-                />
+
+              <div className="pt-4 flex gap-3 border-t border-slate-700">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 py-2.5 border border-slate-700 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-850 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold active:scale-95 transition-all outline-none cursor-pointer"
+                >
+                  Gravar Agendamento
+                </button>
               </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs text-slate-400 block font-semibold">Anotações Internas (Opcional)</label>
-              <textarea 
-                rows={2}
-                className="w-full px-3 py-2 bg-slate-950 text-sm text-white rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all resize-none"
-                value={bookingNotes} onChange={(e) => setBookingNotes(e.target.value)}
-              />
-            </div>
-
-            <div className="pt-4 flex gap-3 border-t border-slate-800">
-              <button 
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="flex-1 py-2.5 border border-slate-800 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-850 transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit"
-                className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold active:scale-95 transition-all outline-none cursor-pointer"
-              >
-                Gravar Agendamento
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>,
-      document.body
-    )}
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Appointment details modal */}
       {detailAppointment && createPortal(
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col animate-fade-in text-slate-200">
-            <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col animate-fade-in text-slate-200">
+            <div className="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-950">
               <h4 className="text-md font-bold text-white font-display flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-indigo-400" />
                 Detalhes do Agendamento
@@ -618,7 +621,7 @@ export default function Dashboard() {
 
             <div className="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
               {/* Header Info (Time, Date, Status Badge) */}
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-4 rounded-xl border border-slate-850">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-4 rounded-xl border border-slate-700">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-indigo-600/10 text-indigo-400 rounded-lg flex items-center justify-center font-bold">
                     <Clock className="w-5 h-5" />
@@ -634,7 +637,7 @@ export default function Dashboard() {
                   <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">{formatPrettyDate(detailAppointment.date)}</p>
                 </div>
 
-                <div className="w-full border-t border-slate-850/60 my-1"></div>
+                <div className="w-full border-t border-slate-700/60 my-1"></div>
 
                 <div className="flex items-center justify-between w-full pt-1">
                   <span className="text-xs text-slate-400 font-semibold">Status do Agendamento:</span>
@@ -655,7 +658,7 @@ export default function Dashboard() {
                 <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
                   <User className="w-3.5 h-3.5 text-slate-500" /> Informações do Cliente
                 </h5>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-3">
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-700 space-y-3">
                   <div>
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Nome Completo</span>
                     <span className="text-sm font-extrabold text-white">{detailAppointment.customerName}</span>
@@ -689,7 +692,7 @@ export default function Dashboard() {
                 <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
                   <Scissors className="w-3.5 h-3.5 text-slate-500" /> Serviço Solicitado
                 </h5>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex items-center justify-between">
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
                   <div>
                     <span className="text-sm font-extrabold text-white block">{detailAppointment.serviceName}</span>
                     <span className="text-xs text-slate-400 font-medium">Tempo estimado: {detailAppointment.duration} min</span>
@@ -708,7 +711,7 @@ export default function Dashboard() {
                 <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
                   <FileText className="w-3.5 h-3.5 text-slate-500" /> Observações do Agendamento
                 </h5>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850">
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-700">
                   {detailAppointment.notes ? (
                     <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-wrap">{detailAppointment.notes}</p>
                   ) : (
@@ -719,7 +722,7 @@ export default function Dashboard() {
             </div>
 
             {/* Actions Footer */}
-            <div className="p-5 border-t border-slate-800 bg-slate-950 flex flex-col sm:flex-row gap-3">
+            <div className="p-5 border-t border-slate-700 bg-slate-950 flex flex-col sm:flex-row gap-3">
               {detailAppointment.status === 'pending' && (
                 <>
                   <button 
@@ -737,7 +740,7 @@ export default function Dashboard() {
                       await updateAppointmentStatus(detailAppointment.id, 'cancelled');
                       setDetailAppointment(prev => prev ? { ...prev, status: 'cancelled' } : null);
                     }}
-                    className="flex-1 py-2.5 bg-slate-900 border border-slate-800 text-slate-300 hover:text-red-400 hover:bg-slate-850 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 bg-slate-900 border border-slate-700 text-slate-300 hover:text-red-400 hover:bg-slate-850 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
                   >
                     <XCircle className="w-4 h-4" />
                     Cancelar Agendamento
@@ -761,7 +764,7 @@ export default function Dashboard() {
               <button 
                 type="button"
                 onClick={() => setDetailAppointment(null)}
-                className="py-2.5 px-6 border border-slate-800 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-850 transition-colors cursor-pointer"
+                className="py-2.5 px-6 border border-slate-700 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-850 transition-colors cursor-pointer"
               >
                 Fechar
               </button>
