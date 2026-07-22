@@ -36,13 +36,14 @@ service cloud.firestore {
     // 3. SCHEMA VALIDATORS
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'name', 'email', 'phone', 'publicSlug']) &&
-             data.keys().size() >= 5 && data.keys().size() <= 8 &&
+             data.keys().size() >= 5 && data.keys().size() <= 12 &&
              data.uid is string && data.uid == request.auth.uid &&
              data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
              data.email is string && data.email.size() <= 150 &&
              data.phone is string && data.phone.size() <= 30 &&
              data.publicSlug is string && data.publicSlug.size() >= 3 && data.publicSlug.size() <= 50 &&
-             data.publicSlug.matches('^[a-z0-9\\-]+$');
+             data.publicSlug.matches('^[a-z0-9\\-]+$') &&
+             (!('bannerUrl' in data) || (data.bannerUrl is string && data.bannerUrl.size() <= 1000));
     }
 
     function isValidService(data) {

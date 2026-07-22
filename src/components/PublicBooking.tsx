@@ -384,7 +384,7 @@ export default function PublicBooking() {
         {/* Banner Column */}
         <div className="md:col-span-5 relative min-h-[250px] md:min-h-full flex flex-col justify-end p-8 bg-neutral-950">
           <img 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaKtwsm7_GInilEPbn0Q8kO8vGPTPmD_l53662ZzXTdMA_Tn8p9JlG-vMu62oyZ4C1f4Uojl-UAh3AebF7e41h9LlrnSGn0P5du0NxtBr5Cyiy2hbNoBdZGFxS7IDQuODZElyYBADDo2WV_XJZ2UXqH5z1cYxKArF2ki2mZJFeo1HQvngVwsbakFGJI0eWZ4rCW53WgPBdhfyzJiTP3DDNQRCmScMbSrCzanfewfbjdspg3K-ep3pf-mvTgtL1MuK5pnpppBX4Ww"
+            src={profile.bannerUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuDaKtwsm7_GInilEPbn0Q8kO8vGPTPmD_l53662ZzXTdMA_Tn8p9JlG-vMu62oyZ4C1f4Uojl-UAh3AebF7e41h9LlrnSGn0P5du0NxtBr5Cyiy2hbNoBdZGFxS7IDQuODZElyYBADDo2WV_XJZ2UXqH5z1cYxKArF2ki2mZJFeo1HQvngVwsbakFGJI0eWZ4rCW53WgPBdhfyzJiTP3DDNQRCmScMbSrCzanfewfbjdspg3K-ep3pf-mvTgtL1MuK5pnpppBX4Ww"}
             alt="Agendamento"
             className="absolute inset-0 w-full h-full object-cover opacity-30 select-none"
           />
@@ -621,8 +621,8 @@ export default function PublicBooking() {
       {/* Visual Portal Banner Section */}
       <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl border border-neutral-800">
         <img 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaKtwsm7_GInilEPbn0Q8kO8vGPTPmD_l53662ZzXTdMA_Tn8p9JlG-vMu62oyZ4C1f4Uojl-UAh3AebF7e41h9LlrnSGn0P5du0NxtBr5Cyiy2hbNoBdZGFxS7IDQuODZElyYBADDo2WV_XJZ2UXqH5z1cYxKArF2ki2mZJFeo1HQvngVwsbakFGJI0eWZ4rCW53WgPBdhfyzJiTP3DDNQRCmScMbSrCzanfewfbjdspg3K-ep3pf-mvTgtL1MuK5pnpppBX4Ww" 
-          alt="Boutique beauty salon interior with minimalist luxury Emerald chairs" 
+          src={profile.bannerUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuDaKtwsm7_GInilEPbn0Q8kO8vGPTPmD_l53662ZzXTdMA_Tn8p9JlG-vMu62oyZ4C1f4Uojl-UAh3AebF7e41h9LlrnSGn0P5du0NxtBr5Cyiy2hbNoBdZGFxS7IDQuODZElyYBADDo2WV_XJZ2UXqH5z1cYxKArF2ki2mZJFeo1HQvngVwsbakFGJI0eWZ4rCW53WgPBdhfyzJiTP3DDNQRCmScMbSrCzanfewfbjdspg3K-ep3pf-mvTgtL1MuK5pnpppBX4Ww"} 
+          alt="Banner do Workspace" 
           className="w-full h-full object-cover select-none"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />

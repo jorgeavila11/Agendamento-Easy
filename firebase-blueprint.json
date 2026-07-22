@@ -11,6 +11,7 @@
         "phone": { "type": "string" },
         "description": { "type": "string" },
         "photoUrl": { "type": "string", "format": "uri" },
+        "bannerUrl": { "type": "string", "format": "uri" },
         "address": { "type": "string" },
         "publicSlug": { "type": "string" }
       },

@@ -9,6 +9,7 @@ export interface ProfessionalProfile {
   phone: string;
   description: string;
   photoUrl?: string;
+  bannerUrl?: string;
   address?: string;
   publicSlug: string; // custom public link slug
   workingSettings: WorkingSettings;
